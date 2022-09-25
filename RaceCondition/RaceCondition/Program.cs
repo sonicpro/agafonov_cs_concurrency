@@ -7,23 +7,31 @@ namespace RaceCondition
     class Program
     {
         const int iterations = 10000;
+        private object _lock = new object();
 
         static void Main()
         {
-            var result = ProcessData();
+            var result = new Program().ProcessData();
             Console.WriteLine(result);
         }
 
-        private static int ProcessData()
+        private int ProcessData()
         {
             var counter = 0;
             ThreadStart proc = () =>
             {
                 for (int i = 0; i < iterations; i++)
                 {
-                    counter++;
+                    lock (_lock)
+                    {
+                        counter++;
+                    }
+
                     Thread.SpinWait(10);
-                    counter--;
+                    lock (_lock)
+                    {
+                        counter--;
+                    }
                 }
             };
             var tasks = Enumerable.Range(1, 4)
